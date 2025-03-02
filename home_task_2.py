@@ -1,24 +1,35 @@
-# import the numpy library
-import numpy as np
 # import the random library
 import random
 # import the string library
 import string
 
 # Generate random number of dictionaries from 2 to 10 inclusive
-num_dicts = np.random.randint(2, 11)
+num_dicts = random.randint(2, 11)
 
 # Create an empty list to store the result
 list_of_dicts = []
 
 # Loop over the dictionaries
 for _ in range(num_dicts):
-    # Generate a random number of keys for each dictionary (1 to 26 inclusive, English alphabet has 26 letters)
-    num_keys = np.random.randint(1, 27)
-    # Generate keys as a lower case alphabets
-    keys = random.sample(string.ascii_lowercase, num_keys)
+    # Generate a random number of keys for each dictionary (1 to 94 inclusive, the largest group size)
+    # 26 lowercase letters, 26 uppercase letters, 10 digits, 32 punctuation marks
+    num_keys = random.randint(1, 95)
+
+    # Generate keys
+    keys = []
+    for _ in range(num_keys):
+        # Randomly choose whether to generate a letter, digit or punctuation
+        choice = random.choice(['letter', 'digit', 'punctuation'])
+        if choice == 'letter':
+            key = random.choice(string.ascii_letters)
+        elif choice == 'digit':
+            key = random.choice(string.digits)
+        else:
+            key = random.choice(string.punctuation)
+        keys.append(key)
+
     # Generate a dictionary with the keys and random values from 1 to 100 inclusive for each key
-    random_dict = {key: np.random.randint(0, 101) for key in keys}
+    random_dict = {key: random.randint(1, 101) for key in keys}
     # Add dictionary to the list of dictionaries
     list_of_dicts.append(random_dict)
 
@@ -50,7 +61,7 @@ print(f"Auxiliary common_dict: {common_dict}")
 final_dict = {}
 # Loop through each key-value pair in common_dict, unpacking the tuple
 for key, (dict_number, value) in common_dict.items():
-    # Create a list to store the key from each dictionary in list_of_dicts and calculate the number of keys
+    # Check if key is unique across all dictionaries by counting its occurrences. If it appears once, use it directly.
     if len([d[key] for d in list_of_dicts if key in d]) == 1:
         # If key is present in only one dictionary, use it directly
         final_dict[key] = value
