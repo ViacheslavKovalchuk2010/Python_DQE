@@ -4,7 +4,7 @@ import random
 import string
 
 # Generate random number of dictionaries from 2 to 10 inclusive
-num_dicts = random.randint(2, 11)
+num_dicts = random.randint(2, 10)
 
 # Create an empty list to store the result
 list_of_dicts = []
@@ -13,7 +13,7 @@ list_of_dicts = []
 for _ in range(num_dicts):
     # Generate a random number of keys for each dictionary (1 to 94 inclusive, the largest group size)
     # 26 lowercase letters, 26 uppercase letters, 10 digits, 32 punctuation marks
-    num_keys = random.randint(1, 95)
+    num_keys = random.randint(1, 94)
 
     # Generate keys
     keys = []
@@ -29,7 +29,7 @@ for _ in range(num_dicts):
         keys.append(key)
 
     # Generate a dictionary with the keys and random values from 1 to 100 inclusive for each key
-    random_dict = {key: random.randint(1, 101) for key in keys}
+    random_dict = {key: random.randint(1, 100) for key in keys}
     # Add dictionary to the list of dictionaries
     list_of_dicts.append(random_dict)
 
