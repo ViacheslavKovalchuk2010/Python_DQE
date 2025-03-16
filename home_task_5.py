@@ -118,7 +118,7 @@ class News(NewsFeedGenerator):
                 print("City cannot be empty. Please enter a valid city.")
 
         # Automatically generate the current date-time
-        publish_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+        publish_date = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
 
         # Format the entry string
         entry = (
@@ -135,6 +135,7 @@ class PrivateAd(NewsFeedGenerator):
     """
     Child class to handle specific behavior for adding private ads.
     """
+
     def add_entry(self):
         """
         Collects and formats data for a `Private Ad` entry, then writes it to the file.
@@ -142,9 +143,7 @@ class PrivateAd(NewsFeedGenerator):
         """
         # Prompt user for the ad text (Mandatory field)
         while True:
-            # Remove extra whitespace
             ad_text = input("Enter the ad text: ").strip()
-            # Check if not empty
             if ad_text:
                 break
             else:
@@ -152,20 +151,22 @@ class PrivateAd(NewsFeedGenerator):
 
         # Prompt user for the expiration date (Mandatory field)
         while True:
-            expiration_date = input("Enter expiration date (YYYY-MM-DD): ").strip()  # Ask for expiration date
+            expiration_date = input("Enter expiration date (DD/MM/YYYY): ").strip()
             try:
-                # Parse the expiration date and calculate remaining days
-                expiration_date_obj = datetime.datetime.strptime(expiration_date, '%Y-%m-%d')
-                days_left = (expiration_date_obj - datetime.datetime.now()).days
+                expiration_date_obj = datetime.datetime.strptime(expiration_date, '%d/%m/%Y')
+                days_left = (expiration_date_obj.date() - datetime.datetime.now().date()).days
 
                 # Expiration date is in the past
                 if days_left < 0:
                     print("The expiration date has already passed. Please enter a future date.")
+                # Expiration date is today
+                elif days_left == 0:
+                    print("The expiration date is today. The ad will expire at the end of the day.")
+                    break
                 else:
                     break  # Exit loop if expiration date is valid
             except ValueError:
-                # Handle invalid date inputs
-                print("Invalid date format. Please use YYYY-MM-DD.")
+                print("Invalid date format. Please use DD/MM/YYYY.")
 
         # Format the entry string
         entry = (
@@ -221,10 +222,10 @@ class BirthAnnouncement(NewsFeedGenerator):
 
         # Prompt user for the birth date (Mandatory field)
         while True:
-            birth_date = input("Enter the birth date (YYYY-MM-DD): ").strip()  # Ask for the birth date
+            birth_date = input("Enter the birth date (DD/MM/YYYY): ").strip()  # Ask for the birth date
             try:
                 # Parse the birth date and ensure the format is correct
-                birth_date_obj = datetime.datetime.strptime(birth_date, '%Y-%m-%d')
+                birth_date_obj = datetime.datetime.strptime(birth_date, '%d/%m/%Y')
 
                 # Validate the birth date (must be a past date)
                 if birth_date_obj > datetime.datetime.now():
@@ -235,7 +236,7 @@ class BirthAnnouncement(NewsFeedGenerator):
                     break  # Exit the loop if the date is valid
             except ValueError:
                 # Handle invalid date inputs
-                print("Invalid date format. Please use YYYY-MM-DD.")
+                print("Invalid date format. Please use DD/MM/YYYY.")
 
         # Format the birth announcement entry
         entry = (
