@@ -1,255 +1,262 @@
+# Import the datetime module for handling date and time
 import datetime
 
 
+# Define the base class `NewsFeedGenerator` which manages the news feed file
 class NewsFeedGenerator:
     def __init__(self, file_name="news_feed.txt"):
         """
-        Parent class to handle common functionality for the news feed file.
+        Constructor for the base class.
+        Sets the file name for the news feed file (default is 'news_feed.txt') and initializes it.
         """
-        self.file_name = file_name
-        # Ensure the file starts with the header
-        self.initialize_file()
+        self.file_name = file_name  # Store the file name in an instance variable
 
-    def initialize_file(self):
+    def read_existing_content(self):
         """
-        Ensures the file has the default header 'News feed:' at the beginning.
-        This runs when the object of the class is initialized.
+        Reads the existing contents of the file and categorizes it into sections:
+        News, Private Ads, and Birth Announcements.
+        Returns a dictionary containing these sections.
         """
-        try:
-            # Check if the file exists and is not empty
-            if not self.check_file_exists_and_has_content():
-                with open(self.file_name, "w") as file:
-                    # Write the default header
-                    file.write("News feed:\n\n")
-                print(f"Default header 'News feed:' added to {self.file_name}!")
-        except Exception as e:
-            print(f"An error occurred while initializing the file: {e}")
+        # Initialize sections as a dictionary with keys for section types
+        sections = {"News": [], "PrivateAd": [], "BirthAnnouncement": []}
+        current_section = None  # Track the current section being processed
 
-    def check_file_exists_and_has_content(self):
-        """
-        Checks if the file exists and contains data.
-        Returns True if the file exists and is not empty, False otherwise.
-        """
         try:
+            # Open the file in read mode and read all lines
             with open(self.file_name, "r") as file:
-                content = file.read()
-                # Check if the file contains content
-                return bool(content.strip())
-                # File doesn't exist
-        except FileNotFoundError:
-            return False
+                content = file.readlines()  # Read file content line by line
 
-    def write_to_file(self, entry):
+            # Process each line in the file to group entries into sections
+            for line in content:
+                if line.startswith("News-------------------"):
+                    # If the line starts with "News", switch to the News section
+                    current_section = "News"
+                    sections[current_section].append(line)
+                elif line.startswith("Private Ad-------------"):
+                    # If the line starts with "Private Ad", switch to the PrivateAd section
+                    current_section = "PrivateAd"
+                    sections[current_section].append(line)
+                elif line.startswith("Birth Announcement-----"):
+                    # If the line starts with "Birth Announcement", switch to the BirthAnnouncement section
+                    current_section = "BirthAnnouncement"
+                    sections[current_section].append(line)
+                elif current_section:
+                    # Append subsequent lines into the current section
+                    sections[current_section].append(line)
+
+        except FileNotFoundError:
+            # Handle case where the file does not exist
+            with open(self.file_name, "w") as file:
+                # Create a new file with the header if it doesn't exist
+                file.write("News feed:\n\n")
+            print(f"File {self.file_name} created with default header!")
+        except Exception as e:
+            # Catch and print any other exceptions that occur during file reading
+            print(f"An error occurred while reading the file: {e}")
+
+        return sections  # Return the dictionary containing categorized sections
+
+    def write_to_file(self, sections):
         """
-        Method to write content to a file.
+        Write the updated sections back to the file.
         """
         try:
-            # Open the file in append mode
-            with open(self.file_name, "a") as file:
-                # Write the provided entry to the file
-                file.write(entry)
-            print("Record published successfully!")
+            # Open the file in write mode (this overwrites the file)
+            with open(self.file_name, "w") as file:
+                file.write("News feed:\n\n")  # Write the header to the file
+                # Write each section in the desired order
+                for section in ["News", "PrivateAd", "BirthAnnouncement"]:
+                    for entry in sections[section]:
+                        file.write(entry)  # Write each entry in the section
+            print("Records updated in the file successfully!")  # Print success message
         except Exception as e:
-            # Handle errors (e.g., permission issues, disk space)
+            # Catch and print any error during writing
             print(f"An error occurred while writing to the file: {e}")
 
     def start(self):
         """
-        Method to handle user menu options and interaction.
+        Method to handle user menu options and interaction (main program loop).
         """
-        while True:
+        sections = self.read_existing_content()  # Load existing content from the file
+
+        while True:  # Infinite loop for user menu until "Exit" is selected
+            # Display menu options to the user
             print("\nSelect what to add:")
             print("1. News")
             print("2. Private Ad")
             print("3. Birth Announcement")
             print("4. Exit")
-            choice = input("Enter your choice (1/2/3/4): ")
+            choice = input("Enter your choice (1/2/3/4): ")  # Take user input
 
             if choice == "1":
-                # Create an instance of the News child class
-                news = News(self.file_name)
-                # Call the add_entry method of News
-                news.add_entry()
+                # If user selects News, create a News instance to handle the entry
+                news = News()
+                entry = news.add_entry()  # Collect a new News entry
+                sections["News"].append(entry)  # Add the entry to the News section
+                self.write_to_file(sections)  # Write updated content back to the file
             elif choice == "2":
-                # Create an instance of PrivateAd
-                private_ad = PrivateAd(self.file_name)
-                # Call the add_entry method of PrivateAd
-                private_ad.add_entry()
+                # If user selects Private Ad, create a PrivateAd instance
+                private_ad = PrivateAd()
+                entry = private_ad.add_entry()  # Collect a new Private Ad entry
+                sections["PrivateAd"].append(entry)  # Add the entry to the PrivateAd section
+                self.write_to_file(sections)  # Write updated content back to the file
             elif choice == "3":
-                # Create an instance of BirthAnnouncement
-                birth_announcement = BirthAnnouncement(self.file_name)
-                # Call the add_entry method of BirthAnnouncement
-                birth_announcement.add_entry()
+                # If user selects Birth Announcement, create a BirthAnnouncement instance
+                birth_announcement = BirthAnnouncement()
+                entry = birth_announcement.add_entry()  # Collect a new Birth Announcement entry
+                sections["BirthAnnouncement"].append(entry)  # Add entry to the BirthAnnouncement section
+                self.write_to_file(sections)  # Write updated content back to the file
             elif choice == "4":
-                # Exit the loop and end the program
+                # Exit the program if user selects "Exit"
                 print("Exiting. Goodbye!")
                 break
             else:
+                # Handle invalid input
                 print("Invalid choice. Please select 1, 2, 3 or 4.")
 
 
-class News(NewsFeedGenerator):
+# Define the `News` child class for handling news entries
+class News:
     """
     Child class to handle specific behavior for adding news.
     """
     def add_entry(self):
         """
-        Collects and formats data for a `News` entry, then writes it to the file.
-        Ensures mandatory fields are not empty.
+        Collects and formats data for a `News` entry.
+        Ensures mandatory fields are not empty and returns the formatted entry.
         """
-        # Prompt user for the news text (Mandatory field)
         while True:
-            # Remove extra whitespace
+            # Prompt the user for news text
             news_text = input("Enter the news text: ").strip()
-            # Check if not empty
-            if news_text:
+            if news_text:  # Validate that the input is not empty
                 break
             else:
                 print("News text cannot be empty. Please enter a valid news text.")
 
-        # Prompt user for the city (Mandatory field)
         while True:
-            # Remove extra whitespace
+            # Prompt the user for the city
             city = input("Enter the city: ").strip()
-            # Check if not empty
-            if city:
+            if city:  # Validate that the input is not empty
                 break
             else:
                 print("City cannot be empty. Please enter a valid city.")
 
-        # Automatically generate the current date-time
+        # Automatically generate the current date and time for publishing
         publish_date = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
-
-        # Format the entry string
-        entry = (
+        # Return the formatted News entry as a string
+        return (
             "News-------------------\n"
             f"{news_text}\n"
             f"{city}, {publish_date}\n\n"
         )
 
-        # Save to file using the parent class method
-        self.write_to_file(entry)
 
-
-class PrivateAd(NewsFeedGenerator):
+# Define the `PrivateAd` child class for handling private ad entries
+class PrivateAd:
     """
     Child class to handle specific behavior for adding private ads.
     """
-
     def add_entry(self):
         """
-        Collects and formats data for a `Private Ad` entry, then writes it to the file.
-        Ensures that `ad_text` and `expiration_date` fields are mandatory.
+        Collects and formats data for a `Private Ad` entry.
+        Ensures mandatory fields are not empty and returns the formatted entry.
         """
-        # Prompt user for the ad text (Mandatory field)
         while True:
+            # Prompt the user for ad text
             ad_text = input("Enter the ad text: ").strip()
-            if ad_text:
+            if ad_text:  # Validate that the input is not empty
                 break
             else:
                 print("Ad text cannot be empty. Please enter a valid ad text.")
 
-        # Prompt user for the expiration date (Mandatory field)
         while True:
+            # Prompt the user for the expiration date
             expiration_date = input("Enter expiration date (DD/MM/YYYY): ").strip()
             try:
+                # Parse the expiration date into a datetime object
                 expiration_date_obj = datetime.datetime.strptime(expiration_date, '%d/%m/%Y')
+                # Calculate the difference between the expiration date and today's date
                 days_left = (expiration_date_obj.date() - datetime.datetime.now().date()).days
 
-                # Expiration date is in the past
                 if days_left < 0:
                     print("The expiration date has already passed. Please enter a future date.")
-                # Expiration date is today
                 elif days_left == 0:
                     print("The expiration date is today. The ad will expire at the end of the day.")
                     break
                 else:
-                    break  # Exit loop if expiration date is valid
+                    break  # Exit loop when the expiration date is valid
             except ValueError:
                 print("Invalid date format. Please use DD/MM/YYYY.")
 
-        # Format the entry string
-        entry = (
+        # Return the formatted Private Ad entry as a string
+        return (
             "Private Ad-------------\n"
             f"{ad_text}\n"
             f"Actual until: {expiration_date}, {days_left} days left\n\n"
         )
 
-        # Save to file using the parent method
-        self.write_to_file(entry)
 
-
-class BirthAnnouncement(NewsFeedGenerator):
+# Define the `BirthAnnouncement` child class for handling birth announcement entries
+class BirthAnnouncement:
     """
     Child class to handle specific behavior for adding birth announcements.
     """
-
     def add_entry(self):
         """
-        Collects and formats data for a birth announcement entry, then writes it to the file.
-        Ensures that all fields are mandatory, with immediate feedback for missing or invalid inputs.
+        Collects and formats data for a birth announcement entry.
+        Ensures mandatory fields are not empty and returns the formatted entry.
         """
-
-        # Prompt user for the child's name (Mandatory field)
         while True:
-            # Remove extra whitespace
+            # Prompt the user for the child's name
             child_name = input("Enter the child's name: ").strip()
-            # Check if not empty
-            if child_name:
+            if child_name:  # Validate that the input is not empty
                 break
             else:
                 print("Child's name cannot be empty. Please enter a valid name.")
 
-        # Prompt user for the location (Mandatory field)
         while True:
-            # Remove extra whitespace
-            location = input("Enter the location (e.g., hospital or city): ").strip()
-            # Check if not empty
-            if location:
+            # Prompt the user for the location
+            location = input("Enter the location: ").strip()
+            if location:  # Validate that the input is not empty
                 break
             else:
                 print("Location cannot be empty. Please enter a valid location.")
 
-        # Prompt user for a message (Optional but ensure it's not empty)
         while True:
-            # Remove extra whitespace
+            # Prompt the user for a short message
             message = input("Enter a short message about the child: ").strip()
-            # Ensure it's not empty
-            if message:
+            if message:  # Validate that the input is not empty
                 break
             else:
                 print("Message cannot be empty. Please enter a valid message.")
 
-        # Prompt user for the birth date (Mandatory field)
         while True:
-            birth_date = input("Enter the birth date (DD/MM/YYYY): ").strip()  # Ask for the birth date
+            # Prompt the user for the birth date
+            birth_date = input("Enter the birth date (DD/MM/YYYY): ").strip()
             try:
-                # Parse the birth date and ensure the format is correct
+                # Parse the birth date into a datetime object
                 birth_date_obj = datetime.datetime.strptime(birth_date, '%d/%m/%Y')
-
-                # Validate the birth date (must be a past date)
+                # Validate that the date is not in the future
                 if birth_date_obj > datetime.datetime.now():
-                    print("Birth date cannot be in the future. Please enter a valid past date.")
-                elif birth_date_obj.year < 1900:
-                    print("Invalid year! Please enter a realistic year (e.g., after 1900).")
+                    print("Birth date cannot be in the future. Please enter a past date.")
                 else:
-                    break  # Exit the loop if the date is valid
+                    break
             except ValueError:
-                # Handle invalid date inputs
                 print("Invalid date format. Please use DD/MM/YYYY.")
 
-        # Format the birth announcement entry
-        entry = (
+        # Return the formatted Birth Announcement entry as a string
+        return (
             "Birth Announcement-----\n"
-            f"Welcome to the world, {child_name}!\n"
-            f"Born on: {birth_date}\n"
+            f"Welcome {child_name}!\n"
+            f"Born on {birth_date}\n"
             f"Location: {location}\n"
             f"Message: {message}\n\n"
         )
 
-        # Save to file using the parent method
-        self.write_to_file(entry)
 
+# Main script execution
 if __name__ == "__main__":
-    generator = NewsFeedGenerator()  # Create an instance of the parent class
-    generator.start()  # Start the user interaction
+    # Create an instance of the NewsFeedGenerator base class
+    generator = NewsFeedGenerator()
+    # Start the user interaction loop
+    generator.start()
