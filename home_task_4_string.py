@@ -119,4 +119,5 @@ def main_function():
     print(f'The actual count of whitespace characters is: {whitespace_count}')
 
 
-main_function()
+if __name__ == "__main__":
+    main_function()
