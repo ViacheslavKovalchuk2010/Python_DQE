@@ -30,9 +30,33 @@ def correct_iz(text):
 
 
 # Function to capitalize sentence
-def capitalize_sentence(sentence):
-    # Capitalize the first letter of a sentence
-    return sentence.capitalize()
+def capitalize_sentence(text):
+    """
+    Capitalizes the first letter of each sentence in the text
+    while keeping the rest of the sentence in lowercase.
+    Proper nouns (like names) are handled separately if required.
+    """
+    # Split the text into sentences by a period followed by a space
+    sentences = re.split(r'([.!?]\s+)', text)  # Retain the punctuation
+    capitalized_sentences = []
+
+    for sentence in sentences:
+        if sentence.strip():  # Ensure sentence is not empty
+            capitalized_sentences.append(
+                sentence[0].upper() + sentence[1:].lower() if sentence[0].isalpha() else sentence
+            )
+        else:
+            capitalized_sentences.append(sentence)
+
+    # Reconstruct the text
+    return ''.join(capitalized_sentences)
+
+def capitalize_proper_noun(text):
+    """
+    Ensures proper nouns are capitalized correctly. Each word is capitalized.
+    Example: "arCHibALd hEnRy" -> "Archibald Henry"
+    """
+    return text.title()  # Capitalize the first letter of each word
 
 
 # Function to get the last word of a sentence (excluding punctuation)
