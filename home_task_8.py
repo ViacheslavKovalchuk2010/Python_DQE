@@ -535,9 +535,6 @@ class ImportFromJson:
             return None
 
     def parse_json(self, file_path):
-        """
-        Processes JSON entries but ensures the entire file is rejected if any entry is invalid.
-        """
         sections = {"News": [], "PrivateAd": [], "BirthAnnouncement": []}
         errors_detected = False  # Flag to track invalid entries
 
